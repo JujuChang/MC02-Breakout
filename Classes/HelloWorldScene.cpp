@@ -87,17 +87,17 @@ bool HelloWorld::init()
 		for (int i = 0; i < 18; i++) {
 			static int padding = 5;
 			auto block = Sprite::create("brick.png");
-			auto blockBody = PhysicsBody::createBox(block->getContentSize(), PHYSICSBODY_MATERIAL_DEFAULT);
-			blockBody->getShape(0)->setDensity(10.0f);
-			blockBody->getShape(0)->setFriction(0.0f);
-			blockBody->getShape(0)->setRestitution(1.f);
-			blockBody->setDynamic(false);
+			auto brickBody = PhysicsBody::createBox(block->getContentSize(), PHYSICSBODY_MATERIAL_DEFAULT);
+			brickBody->getShape(0)->setDensity(10.0f);
+			brickBody->getShape(0)->setFriction(0.0f);
+			brickBody->getShape(0)->setRestitution(1.f);
+			brickBody->setDynamic(false);
 			// Create the distance even among the bricks
 			int xOffset = padding + block->getContentSize().width / 2 +
 				((block->getContentSize().width + padding)*i);
 			block->setPosition(xOffset, visibleSize.height - (50 * j));
-			blockBody->setContactTestBitmask(0x000001);
-			block->setPhysicsBody(blockBody);
+			brickBody->setContactTestBitmask(0x000001);
+			block->setPhysicsBody(brickBody);
 			block->setTag(3);
 			this->addChild(block);
 		}
@@ -149,12 +149,11 @@ bool HelloWorld::onContactBegin(PhysicsContact& contact)
 	auto a = contact.getShapeA()->getBody();
 	auto b = contact.getShapeB()->getBody();
 
-	// save the velocity, ignore the direction of velocity, only save the length
-	float* v = new float[2];
-	v[0] = a->getVelocity().length();
-	v[1] = b->getVelocity().length();
+	float* vel = new float[2];
+	vel[0] = a->getVelocity().length();
+	vel[1] = b->getVelocity().length();
 
-	contact.setData(v);
+	contact.setData(vel);
 
 	
 	return true;
@@ -166,12 +165,12 @@ void HelloWorld::onContactSeperate(PhysicsContact& contact) {
 
 	// restore the velocity, keep the direction of the velocity.
 	float* v = (float*)contact.getData();
-	Vec2 va = bodyA->getVelocity();
-	Vec2 vb = bodyB->getVelocity();
-	va.normalize();
-	vb.normalize();
-	bodyA->setVelocity(va * v[0]);
-	bodyB->setVelocity(vb * v[1]);
+	Vec2 velA = bodyA->getVelocity();
+	Vec2 velB = bodyB->getVelocity();
+	velA.normalize();
+	velB.normalize();
+	bodyA->setVelocity(velA * v[0]);
+	bodyB->setVelocity(velB * v[1]);
 
 	delete v;
 
